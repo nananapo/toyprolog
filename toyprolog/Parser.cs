@@ -99,6 +99,7 @@ public static class Parser
   public static IClause ExpectClause(List<IToken> tokens, ref int index)
   {
     var term = ExpectPredicate(tokens, ref index);
+    
     if (ConsumeSymbol(tokens, ref index, SymbolToken.SymbolType.連言))
     {
       var term2 = ExpectClause(tokens, ref index);

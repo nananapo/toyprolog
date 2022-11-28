@@ -2,21 +2,25 @@
 using toyprolog.AST;
 
 Console.WriteLine("toyprolog");
-Console.WriteLine("Loading file...");
 
+// load file
 List<ISentence> global;
 {
+  Console.WriteLine("Loading file...");
   var program = File.ReadAllText("test/sample.pl");
   var tokens = Tokenizer.Run(program);
   var sentences = Parser.Run(tokens);
-  Console.WriteLine("Loaded file : " + sentences.Count + " sentences");
-  /*
-  foreach (var sentence in sentences)
-    Console.WriteLine(sentence);
-    */
   global = sentences;
 }
 
+// assert
+foreach (var sentence in global)
+{
+  Assert.AssertDefinitionSentence(sentence);
+}
+
+// loaded
+Console.WriteLine("Loaded file : " + global.Count + " sentences");
 
 while (true)
 {
@@ -47,25 +51,18 @@ while (true)
     continue;
   }
 
-  if (headSentence.Match(new HeadSentence(new Atom("halt"))))
+  if (headSentence.Head is Variable)
+  {
+    Console.WriteLine(">> 42 <<");
+    continue;
+  }
+
+  if (headSentence.Head.Equals(new Atom("halt")))
   {
     Console.WriteLine("終了");
     return;
   }
 
   var solver = new Solver(global, headSentence);
-
-  while (true)
-  {
-    var result = solver.Run();
-    Console.WriteLine(result);
-    
-    if (!solver.IsContinue)
-      break;
-    
-    Console.Write(" ");
-    var q = Console.Read();
-    if (q != ';')
-      break;
-  }
+  solver.Run();
 }

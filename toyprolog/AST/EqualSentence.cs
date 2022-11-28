@@ -13,7 +13,6 @@ public class EqualSentence : ISentence
 
   public bool Match(HeadSentence sentence)
   {
-    return false;
-    throw new NotImplementedException();
+    return Head.Match(sentence.Head);
   }
 }
