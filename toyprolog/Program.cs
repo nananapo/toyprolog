@@ -4,23 +4,74 @@ using toyprolog.AST;
 Console.WriteLine("toyprolog");
 
 // load file
-List<ISentence> global;
+var global = new List<ISentence>();
+
+void LoadFile(string fileName)
 {
   Console.WriteLine("Loading file...");
-  var program = File.ReadAllText("test/sample.pl");
-  var tokens = Tokenizer.Run(program);
-  var sentences = Parser.Run(tokens);
-  global = sentences;
+
+  try
+  {
+    var program = File.ReadAllText(fileName);
+    var tokens = Tokenizer.Run(program);
+    var sentences = Parser.Run(tokens);
+
+    // assert
+    foreach (var sentence in sentences)
+    {
+      Assert.AssertDefinitionSentence(sentence);
+    }
+
+    global.AddRange(sentences);
+  }
+  catch(Exception ex)
+  {
+    Console.WriteLine(ex);
+    Console.WriteLine("failed to load file");
+    return ;
+  }
+  // loaded
+  Console.WriteLine("true");
 }
 
-// assert
-foreach (var sentence in global)
+bool RunCommand(ITerm term)
 {
-  Assert.AssertDefinitionSentence(sentence);
+
+  if (term.IsAmbiguous())
+  {
+    return false;
+  }
+
+  var haltCommand = new Atom("halt");
+  var consultCommand = new MultTerm(new Atom("consult"), new List<ITerm>{new Variable("T")});
+
+  // halt
+  if (term.Equals(haltCommand))
+  {
+    Console.WriteLine("Bye");
+    System.Environment.Exit(0);
+    return true;
+  }
+
+  // consult
+  if (term.Match(consultCommand))
+  {
+    var resolve = consultCommand.ResolveTerm(term);
+    foreach (var (k,vl) in resolve)
+    {
+      foreach (var v in vl)
+      {
+        Console.WriteLine(k + " " + v);
+        // TODO
+      }
+    }
+    return true;
+  }
+
+  return false;
 }
 
-// loaded
-Console.WriteLine("Loaded file : " + global.Count + " sentences");
+LoadFile("test/sample.pl");
 
 while (true)
 {
@@ -57,10 +108,11 @@ while (true)
     continue;
   }
 
-  if (headSentence.Head.Equals(new Atom("halt")))
+  var head = headSentence.Head;
+
+  if (RunCommand(head))
   {
-    Console.WriteLine("終了");
-    return;
+    continue ;
   }
 
   var solver = new Solver(global, headSentence);
