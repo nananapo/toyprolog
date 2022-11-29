@@ -60,9 +60,10 @@ public class Solver
     throw new SolveEndException();
   }
 
-  private bool ConsumeWriteCommand(ITerm term)
+  private bool ConsumeCommands(ITerm term)
   {
     var writeCommand = new MultTerm(new Atom("write"), new List<ITerm>{new Variable("T")});
+	var nlCommand = new Atom("nl");
 
     // write
     if (term.Match(writeCommand))
@@ -83,14 +84,20 @@ public class Solver
         return true;
       }
     }
+    // nl
+    if (nlCommand.Equals(term))
+    {
+      Console.WriteLine();
+      return true;
+    }
     return false;
   }
 
   private void SolveGlobal(HeadSentence query, Action<Dictionary<Variable, ITerm>>? callback)
   {
 
-    // クエリがwriteなら終了
-    if (ConsumeWriteCommand(query.Head))
+    // クエリがコマンドなら終了
+    if (ConsumeCommands(query.Head))
     {
       if (callback != null)
       {
