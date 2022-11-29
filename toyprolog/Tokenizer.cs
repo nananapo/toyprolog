@@ -65,6 +65,54 @@ public static class Tokenizer
     return (result.Length > 0, index, result);
   }
 
+  public static (bool result, int index, string str) ReadStrLiteral(string program, int index)
+  {
+    var result = "";
+    var isClosed = false;
+    var startIndex = index;
+
+    // 範囲外
+    if (index >= program.Length || program[index] != '\"')
+    {
+      return (false, index, result);
+    }
+
+    index += 1;
+
+    for (; index < program.Length; index++)
+    {
+      if (program[index] == '"')
+      {
+        isClosed = true;
+        break;
+      }
+      if (program[index] == '\\')
+      {
+        index += 1;
+        if (index >= program.Length)
+        {
+          break;
+        }
+        switch(program[index])
+        {
+          case 'n':
+            result += "\n";
+             break;
+          default:
+            throw new Exception("invalid escape sequence");
+        }
+        continue;
+      }
+      result += program[index];
+    }
+
+    if (!isClosed)
+    {
+       return (false, startIndex, "");
+    }
+    return (true, index + 1, result);
+  }
+
   public static List<IToken> Run(string program)
   {
     var result = new List<IToken>();
@@ -95,6 +143,13 @@ public static class Tokenizer
       }
 
       (success, index, string str) = ReadString(program, index);
+      if (success)
+      {
+        result.Add(new StringToken(str));
+        continue;
+      }
+
+      (success, index, str) = ReadStrLiteral(program, index);
       if (success)
       {
         result.Add(new StringToken(str));
