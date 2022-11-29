@@ -64,6 +64,7 @@ bool RunCommand(ITerm term)
       }
       if (vl[0] is not Atom)
       {
+        // TODO ここエラー
         continue;
       }
       LoadFile(vl[0].ToString() + ".pl");
@@ -106,7 +107,7 @@ while (true)
 
   if (sentences[0] is not HeadSentence headSentence)
   {
-    Console.WriteLine("質問は頭語のみ");
+    Console.WriteLine("質問は頭語のみ"); // TODO そんなことはない
     continue;
   }
 

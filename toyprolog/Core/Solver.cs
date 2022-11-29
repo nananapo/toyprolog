@@ -12,8 +12,6 @@ public class Solver
 
   private readonly List<IRunEnv> _envStack = new ();
   
-  // 連言はActionのチェーンを作る
-
   public Solver(List<ISentence> sentences, HeadSentence query)
   {
     _globalSentences = sentences;
@@ -62,8 +60,45 @@ public class Solver
     throw new SolveEndException();
   }
 
+  private bool ConsumeWriteCommand(ITerm term)
+  {
+    var writeCommand = new MultTerm(new Atom("write"), new List<ITerm>{new Variable("T")});
+
+    // write
+    if (term.Match(writeCommand))
+    {
+      var resolve = writeCommand.ResolveTerm(term);
+      foreach (var (k,vl) in resolve)
+      {
+        if (vl.Count != 1)
+        {
+          continue;
+        }
+        if (vl[0] is not Atom)
+        {
+          // TODO ここエラー
+          continue;
+        }
+        Console.WriteLine(vl[0].ToString());
+        return true;
+      }
+    }
+    return false;
+  }
+
   private void SolveGlobal(HeadSentence query, Action<Dictionary<Variable, ITerm>>? callback)
   {
+
+    // クエリがwriteなら終了
+    if (ConsumeWriteCommand(query.Head))
+    {
+      if (callback != null)
+      {
+        callback(new Dictionary<Variable, ITerm>());
+      }
+      return;
+    }
+
     foreach (var sentence in _globalSentences)
     {
       // 外形が一致しないなら終了
