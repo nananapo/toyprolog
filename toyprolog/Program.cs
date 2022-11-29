@@ -8,8 +8,7 @@ var global = new List<ISentence>();
 
 void LoadFile(string fileName)
 {
-  Console.WriteLine("Loading file...");
-
+  // Console.WriteLine("Loading file...");
   try
   {
     var program = File.ReadAllText(fileName);
