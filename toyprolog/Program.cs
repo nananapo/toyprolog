@@ -74,8 +74,13 @@ bool RunCommand(ITerm term)
   return false;
 }
 
-LoadFile("test/sample.pl");
+// load arg[0] file
+if (args.Length >= 1)
+{
+	LoadFile(args[0]);
+}
 
+// answer questions
 while (true)
 {
   Console.Write("?- ");
