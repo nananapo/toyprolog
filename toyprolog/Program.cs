@@ -59,13 +59,17 @@ bool RunCommand(ITerm term)
     var resolve = consultCommand.ResolveTerm(term);
     foreach (var (k,vl) in resolve)
     {
-      foreach (var v in vl)
+      if (vl.Count != 1)
       {
-        Console.WriteLine(k + " " + v);
-        // TODO
+        continue;
       }
+      if (vl[0] is not Atom)
+      {
+        continue;
+      }
+      LoadFile(vl[0].ToString() + ".pl");
+      return true;
     }
-    return true;
   }
 
   return false;
